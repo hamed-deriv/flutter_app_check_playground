@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
-void main() {
+import 'package:firebase_core/firebase_core.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   runApp(const MyApp());
 }
 
@@ -29,14 +33,24 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final Future<FirebaseApp> firebaseApp = Firebase.initializeApp();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Flutter Demo Home Page')),
       body: Center(
-        child: Text(
-          'Some Data',
-          style: Theme.of(context).textTheme.headline4,
+        child: FutureBuilder(
+          future: firebaseApp,
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Text(snapshot.error.toString());
+            } else if (snapshot.connectionState == ConnectionState.done) {
+              return const Text('Success!');
+            } else {
+              return const CircularProgressIndicator();
+            }
+          },
         ),
       ),
     );
